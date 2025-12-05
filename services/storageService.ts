@@ -62,3 +62,56 @@ export const getSettings = (): UserSettings => {
 export const saveSettings = (settings: UserSettings): void => {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
 };
+
+// Export all data for backup
+export const exportData = (): string => {
+  try {
+    const categories = getCategories();
+    const settings = getSettings();
+    const data = {
+      version: '1.0.0',
+      exportDate: new Date().toISOString(),
+      categories,
+      settings
+    };
+    return JSON.stringify(data, null, 2);
+  } catch (e) {
+    console.error('Failed to export data', e);
+    throw e;
+  }
+};
+
+// Import data from backup
+export const importData = (jsonString: string): { categories: Category[]; settings: UserSettings } => {
+  try {
+    const data = JSON.parse(jsonString);
+    
+    // Validate data structure
+    if (!data.categories || !Array.isArray(data.categories)) {
+      throw new Error('Invalid data format: categories missing or invalid');
+    }
+    
+    if (!data.settings || typeof data.settings !== 'object') {
+      throw new Error('Invalid data format: settings missing or invalid');
+    }
+
+    // Validate categories structure
+    for (const category of data.categories) {
+      if (!category.id || !category.title || !Array.isArray(category.shortcuts)) {
+        throw new Error('Invalid category structure');
+      }
+    }
+
+    // Save imported data
+    saveCategories(data.categories);
+    saveSettings(data.settings);
+
+    return {
+      categories: data.categories,
+      settings: data.settings
+    };
+  } catch (e) {
+    console.error('Failed to import data', e);
+    throw e;
+  }
+};

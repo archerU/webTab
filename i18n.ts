@@ -41,6 +41,15 @@ export interface Translations {
   searchPlaceholder: string;
   consultingStars: string;
   goodDay: string;
+  editCategory: string;
+  dataManagement: string;
+  exportConfig: string;
+  importConfig: string;
+  exportFailed: string;
+  importFailed: string;
+  importSuccess: string;
+  invalidFileFormat: string;
+  importExportHint: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -55,7 +64,7 @@ export const translations: Record<Language, Translations> = {
     url: 'URL',
     uploadIcon: 'Upload Icon',
     selectColor: 'Select Color',
-    autoFetchIcon: 'Auto Fetch from Website',
+    autoFetchIcon: 'Auto Fetch Icon',
     customIcon: 'Custom Icon',
     useWebsiteIcon: 'Use Website Icon',
     noIconSelected: 'No Icon Selected',
@@ -85,6 +94,15 @@ export const translations: Record<Language, Translations> = {
     searchPlaceholder: 'Search the web...',
     consultingStars: 'Consulting the stars...',
     goodDay: 'Good day, {name}.',
+    editCategory: 'Edit Category',
+    dataManagement: 'Data Management',
+    exportConfig: 'Export Configuration',
+    importConfig: 'Import Configuration',
+    exportFailed: 'Failed to export configuration',
+    importFailed: 'Failed to import configuration. Please check the file format.',
+    importSuccess: 'Configuration imported successfully!',
+    invalidFileFormat: 'Invalid file format. Please select a JSON file.',
+    importExportHint: 'Export your configuration to backup, or import a previous backup to restore.',
   },
   zh: {
     addShortcut: '添加快捷方式',
@@ -97,7 +115,7 @@ export const translations: Record<Language, Translations> = {
     url: '网址',
     uploadIcon: '上传图标',
     selectColor: '选择颜色',
-    autoFetchIcon: '自动获取网站图标',
+    autoFetchIcon: '自动获取图标',
     customIcon: '自定义图标',
     useWebsiteIcon: '使用网站图标',
     noIconSelected: '未选择图标',
@@ -127,6 +145,15 @@ export const translations: Record<Language, Translations> = {
     searchPlaceholder: '搜索网页...',
     consultingStars: '正在咨询星辰...',
     goodDay: '你好，{name}。',
+    editCategory: '编辑分类',
+    dataManagement: '数据管理',
+    exportConfig: '导出配置',
+    importConfig: '导入配置',
+    exportFailed: '导出配置失败',
+    importFailed: '导入配置失败，请检查文件格式。',
+    importSuccess: '配置导入成功！',
+    invalidFileFormat: '无效的文件格式，请选择 JSON 文件。',
+    importExportHint: '导出配置以备份，或导入之前的备份以恢复。',
   },
 };
 

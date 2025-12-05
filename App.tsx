@@ -3,7 +3,7 @@ import { Settings, Globe } from 'lucide-react';
 import ShortcutGrid from './components/ShortcutGrid';
 import AddShortcutModal from './components/AddShortcutModal';
 import SettingsModal from './components/SettingsModal';
-import { saveCategories, getCategories, getSettings } from './services/storageService';
+import { saveCategories, getCategories, getSettings, saveSettings } from './services/storageService';
 import { Shortcut, Category, ModalType } from './types';
 import { useLanguage } from './contexts/LanguageContext';
 
@@ -65,6 +65,24 @@ function App() {
   const handleDeleteCategory = (id: string) => {
     const updated = categories.filter(c => c.id !== id);
     saveAll(updated);
+  };
+
+  const handleUpdateCategory = (id: string, title: string) => {
+    const updated = categories.map(cat => 
+      cat.id === id ? { ...cat, title } : cat
+    );
+    saveAll(updated);
+  };
+
+  const handleImportData = (importedCategories: Category[], importedSettings?: any) => {
+    setCategories(importedCategories);
+    if (importedCategories.length > 0) {
+      setActiveCategoryId(importedCategories[0].id);
+    }
+    if (importedSettings) {
+      setSettings(importedSettings);
+      saveSettings(importedSettings);
+    }
   };
 
   // --- Shortcut Actions ---
@@ -231,6 +249,8 @@ function App() {
         categories={categories}
         onAddCategory={handleAddCategory}
         onDeleteCategory={handleDeleteCategory}
+        onUpdateCategory={handleUpdateCategory}
+        onImportData={handleImportData}
       />
 
     </div>
