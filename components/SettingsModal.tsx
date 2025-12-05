@@ -28,6 +28,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   const [editingCategoryName, setEditingCategoryName] = useState('');
   const [importError, setImportError] = useState<string>('');
   const [importSuccess, setImportSuccess] = useState(false);
+  const [exportSuccess, setExportSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { language, setLanguage: setLang, t } = useLanguage();
   
@@ -43,6 +44,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
       setNewCategoryName('');
       setImportError('');
       setImportSuccess(false);
+      setExportSuccess(false);
     }
   }, [isOpen]);
 
@@ -74,9 +76,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     setEditingCategoryName('');
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     try {
-      const data = exportData();
+      const data = await exportData();
       const blob = new Blob([data], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -86,8 +88,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      setImportSuccess(true);
-      setTimeout(() => setImportSuccess(false), 3000);
+      setExportSuccess(true);
+      setTimeout(() => setExportSuccess(false), 3000);
     } catch (error) {
       console.error('Export failed:', error);
       setImportError(t.exportFailed);
@@ -110,11 +112,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     }
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
         const jsonString = event.target?.result as string;
-        const { categories: importedCategories, settings: importedSettings } = importData(jsonString);
-        onImportData(importedCategories, importedSettings);
+        const { categories: importedCategories, settings: importedSettings } = await importData(jsonString);
+        await onImportData(importedCategories, importedSettings);
         setImportSuccess(true);
         setTimeout(() => {
           setImportSuccess(false);
@@ -256,6 +258,15 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             <div className="mb-8">
                 <h3 className="text-sm font-medium text-white/60 uppercase tracking-wider mb-4">{t.dataManagement}</h3>
                 
+                {/* Sync Status */}
+                {typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync && (
+                    <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                        <p className="text-xs text-blue-400 text-center">
+                            {t.syncEnabled}
+                        </p>
+                    </div>
+                )}
+                
                 <div className="flex flex-col gap-3">
                     <button
                         onClick={handleExport}
@@ -284,6 +295,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     {importError && (
                         <div className="p-3 bg-red-500/20 border border-red-500/30 text-red-400 rounded-lg text-sm">
                             {importError}
+                        </div>
+                    )}
+                    
+                    {exportSuccess && (
+                        <div className="p-3 bg-green-500/20 border border-green-500/30 text-green-400 rounded-lg text-sm">
+                            {t.exportSuccess}
                         </div>
                     )}
                     

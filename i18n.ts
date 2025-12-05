@@ -46,10 +46,12 @@ export interface Translations {
   exportConfig: string;
   importConfig: string;
   exportFailed: string;
+  exportSuccess: string;
   importFailed: string;
   importSuccess: string;
   invalidFileFormat: string;
   importExportHint: string;
+  syncEnabled: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -99,10 +101,12 @@ export const translations: Record<Language, Translations> = {
     exportConfig: 'Export Configuration',
     importConfig: 'Import Configuration',
     exportFailed: 'Failed to export configuration',
+    exportSuccess: 'Configuration exported successfully!',
     importFailed: 'Failed to import configuration. Please check the file format.',
     importSuccess: 'Configuration imported successfully!',
     invalidFileFormat: 'Invalid file format. Please select a JSON file.',
     importExportHint: 'Export your configuration to backup, or import a previous backup to restore.',
+    syncEnabled: '✓ Your data is synced to your Google account',
   },
   zh: {
     addShortcut: '添加快捷方式',
@@ -150,10 +154,12 @@ export const translations: Record<Language, Translations> = {
     exportConfig: '导出配置',
     importConfig: '导入配置',
     exportFailed: '导出配置失败',
+    exportSuccess: '配置导出成功！',
     importFailed: '导入配置失败，请检查文件格式。',
     importSuccess: '配置导入成功！',
     invalidFileFormat: '无效的文件格式，请选择 JSON 文件。',
     importExportHint: '导出配置以备份，或导入之前的备份以恢复。',
+    syncEnabled: '✓ 您的数据已同步到 Google 账号',
   },
 };
 
