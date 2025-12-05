@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generate webTab Icon</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #1a1a1a;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    canvas {
+      border: 2px solid #333;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    button {
+      padding: 10px 20px;
+      background: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #7c3aed;
+    }
+    .preview {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .preview-item {
+      text-align: center;
+    }
+    .preview-item h3 {
+      margin: 10px 0 5px;
+      font-size: 14px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <h1>webTab Extension Icon Generator</h1>
+  
+  <canvas id="iconCanvas" width="128" height="128"></canvas>
+  
+  <div class="controls">
+    <button onclick="downloadIcon(16)">Download 16x16</button>
+    <button onclick="downloadIcon(48)">Download 48x48</button>
+    <button onclick="downloadIcon(128)">Download 128x128</button>
+    <button onclick="downloadAll()">Download All Sizes</button>
+  </div>
+  
+  <div class="preview">
+    <div class="preview-item">
+      <canvas id="preview16" width="16" height="16"></canvas>
+      <h3>16x16</h3>
+    </div>
+    <div class="preview-item">
+      <canvas id="preview48" width="48" height="48"></canvas>
+      <h3>48x48</h3>
+    </div>
+    <div class="preview-item">
+      <canvas id="preview128" width="128" height="128"></canvas>
+      <h3>128x128</h3>
+    </div>
+  </div>
+
+  <script>
+    function drawIcon(canvas, size) {
+      const ctx = canvas.getContext('2d');
+      const scale = size / 128;
+      
+      // Clear canvas
+      ctx.clearRect(0, 0, size, size);
+      
+      // Background gradient
+      const bgGradient = ctx.createLinearGradient(0, 0, size, size);
+      bgGradient.addColorStop(0, '#6366f1');
+      bgGradient.addColorStop(1, '#8b5cf6');
+      
+      // Draw rounded rectangle background
+      const radius = 24 * scale;
+      ctx.beginPath();
+      ctx.moveTo(radius, 0);
+      ctx.lineTo(size - radius, 0);
+      ctx.quadraticCurveTo(size, 0, size, radius);
+      ctx.lineTo(size, size - radius);
+      ctx.quadraticCurveTo(size, size, size - radius, size);
+      ctx.lineTo(radius, size);
+      ctx.quadraticCurveTo(0, size, 0, size - radius);
+      ctx.lineTo(0, radius);
+      ctx.quadraticCurveTo(0, 0, radius, 0);
+      ctx.closePath();
+      ctx.fillStyle = bgGradient;
+      ctx.fill();
+      
+      // Glass effect overlay
+      const glassGradient = ctx.createLinearGradient(0, 0, size, size);
+      glassGradient.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
+      glassGradient.addColorStop(1, 'rgba(255, 255, 255, 0.05)');
+      ctx.fillStyle = glassGradient;
+      ctx.fill();
+      
+      // Draw tab/window icon
+      const offsetX = 20 * scale;
+      const offsetY = 20 * scale;
+      
+      // Tab shape
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.lineWidth = 2 * scale;
+      
+      ctx.beginPath();
+      ctx.moveTo(offsetX + 8 * scale, offsetY + 8 * scale);
+      ctx.lineTo(offsetX + 48 * scale, offsetY + 8 * scale);
+      ctx.lineTo(offsetX + 48 * scale, offsetY + 16 * scale);
+      ctx.lineTo(offsetX + 68 * scale, offsetY + 16 * scale);
+      ctx.lineTo(offsetX + 68 * scale, offsetY + 72 * scale);
+      ctx.lineTo(offsetX + 8 * scale, offsetY + 72 * scale);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      
+      // Inner grid lines
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.fillRect(offsetX + 12 * scale, offsetY + 20 * scale, 52 * scale, 4 * scale);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.fillRect(offsetX + 12 * scale, offsetY + 28 * scale, 40 * scale, 4 * scale);
+      ctx.fillRect(offsetX + 12 * scale, offsetY + 36 * scale, 48 * scale, 4 * scale);
+      
+      // Grid squares
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.lineWidth = 1 * scale;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+      
+      const squareSize = 20 * scale;
+      const squareRadius = 2 * scale;
+      const squares = [
+        [offsetX + 12 * scale, offsetY + 44 * scale],
+        [offsetX + 36 * scale, offsetY + 44 * scale],
+        [offsetX + 12 * scale, offsetY + 68 * scale],
+        [offsetX + 36 * scale, offsetY + 68 * scale]
+      ];
+      
+      squares.forEach(([x, y]) => {
+        roundRect(ctx, x, y, squareSize, squareSize, squareRadius);
+        ctx.fill();
+        ctx.stroke();
+      });
+      
+      // W letter
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.font = `bold ${32 * scale}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('W', size / 2, size * 0.7);
+    }
+    
+    function roundRect(ctx, x, y, width, height, radius) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+    }
+    
+    function downloadIcon(size) {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      drawIcon(canvas, size);
+      
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `icon-${size}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    }
+    
+    function downloadAll() {
+      [16, 48, 128].forEach((size, index) => {
+        setTimeout(() => downloadIcon(size), index * 500);
+      });
+    }
+    
+    // Draw all previews
+    window.addEventListener('load', () => {
+      const sizes = [16, 48, 128];
+      sizes.forEach(size => {
+        const canvas = document.getElementById(`preview${size}`);
+        drawIcon(canvas, size);
+      });
+      
+      // Draw main canvas
+      const mainCanvas = document.getElementById('iconCanvas');
+      drawIcon(mainCanvas, 128);
+    });
+  </script>
+</body>
+</html>
+
