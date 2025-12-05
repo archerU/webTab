@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Settings, Globe } from 'lucide-react';
 import ShortcutGrid from './components/ShortcutGrid';
 import AddShortcutModal from './components/AddShortcutModal';
@@ -24,6 +24,8 @@ function App() {
   });
   const [modalType, setModalType] = useState<ModalType>(ModalType.NONE);
   const [isLoaded, setIsLoaded] = useState(true); // Start as loaded to avoid black screen
+  const categoryDragItem = useRef<number | null>(null);
+  const categoryDragOverItem = useRef<number | null>(null);
   const { language, setLanguage: setLang, t } = useLanguage();
   
   const handleLanguageToggle = () => {
@@ -72,6 +74,47 @@ function App() {
       cat.id === id ? { ...cat, title } : cat
     );
     saveAll(updated);
+  };
+
+  const handleReorderCategory = (fromIndex: number, toIndex: number) => {
+    const result = [...categories];
+    const [removed] = result.splice(fromIndex, 1);
+    result.splice(toIndex, 0, removed);
+    saveAll(result);
+  };
+
+  // Category drag handlers
+  const handleCategoryDragStart = (e: React.DragEvent, position: number, categoryId: string) => {
+    categoryDragItem.current = position;
+    e.dataTransfer.setData('application/webtab-category', categoryId);
+    e.dataTransfer.effectAllowed = 'move';
+    
+    const el = e.currentTarget as HTMLElement;
+    setTimeout(() => {
+      el.classList.add('opacity-50');
+    }, 0);
+  };
+
+  const handleCategoryDragEnter = (e: React.DragEvent, position: number) => {
+    e.preventDefault();
+    categoryDragOverItem.current = position;
+  };
+
+  const handleCategoryDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleCategoryDragEnd = (e: React.DragEvent) => {
+    const el = e.currentTarget as HTMLElement;
+    el.classList.remove('opacity-50');
+
+    if (categoryDragItem.current !== null && categoryDragOverItem.current !== null && 
+        categoryDragItem.current !== categoryDragOverItem.current) {
+      handleReorderCategory(categoryDragItem.current, categoryDragOverItem.current);
+    }
+    
+    categoryDragItem.current = null;
+    categoryDragOverItem.current = null;
   };
 
   const handleImportData = (importedCategories: Category[], importedSettings?: any) => {
@@ -202,8 +245,16 @@ function App() {
         <div className="flex-1 overflow-y-auto px-1 pb-20 custom-scrollbar">
           {/* Grid Layout for Categories (2 columns on medium+ screens for the 4-grid look) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pb-8">
-            {categories.map((category) => (
-              <div key={category.id} className="animate-fade-in-up flex flex-col h-full">
+            {categories.map((category, index) => (
+              <div 
+                key={category.id} 
+                className="animate-fade-in-up flex flex-col h-full cursor-move"
+                draggable
+                onDragStart={(e) => handleCategoryDragStart(e, index, category.id)}
+                onDragEnter={(e) => handleCategoryDragEnter(e, index)}
+                onDragOver={handleCategoryDragOver}
+                onDragEnd={handleCategoryDragEnd}
+              >
                 <h2 className="text-xs font-semibold text-white/90 mb-1 pl-2 flex items-center gap-2 uppercase tracking-wider">
                   {category.title}
                 </h2>
