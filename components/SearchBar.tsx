@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Search } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const SearchBar: React.FC = () => {
   const [query, setQuery] = useState('');
+  const { t } = useLanguage();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,7 +21,7 @@ const SearchBar: React.FC = () => {
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search the web..."
+        placeholder={t.searchPlaceholder}
         className="w-full py-4 pl-12 pr-6 bg-glass backdrop-blur-sm rounded-full text-white placeholder-white/60 border border-glassBorder focus:outline-none focus:bg-glassHover focus:border-white/40 shadow-lg transition-all duration-300 text-lg"
         autoFocus
       />

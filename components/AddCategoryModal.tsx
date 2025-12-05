@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface AddCategoryModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface AddCategoryModalProps {
 const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ isOpen, onClose, onAdd }) => {
   const [title, setTitle] = useState('');
   const [error, setError] = useState('');
+  const { t } = useLanguage();
 
   if (!isOpen) return null;
 
@@ -18,7 +20,7 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ isOpen, onClose, on
     setError('');
 
     if (!title.trim()) {
-      setError('Please enter a category name');
+      setError(t.enterCategoryName);
       return;
     }
 
@@ -37,17 +39,17 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ isOpen, onClose, on
           <X size={20} />
         </button>
         
-        <h2 className="text-xl font-semibold text-white mb-6">New Category</h2>
+        <h2 className="text-xl font-semibold text-white mb-6">{t.newCategory}</h2>
         
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="block text-xs font-medium text-white/60 mb-1 uppercase tracking-wider">Name</label>
+            <label className="block text-xs font-medium text-white/60 mb-1 uppercase tracking-wider">{t.name}</label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:bg-white/10 transition-all placeholder-white/20"
-              placeholder="e.g. Work"
+              placeholder={t.categoryPlaceholder}
               autoFocus
             />
           </div>
@@ -60,13 +62,13 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ isOpen, onClose, on
               onClick={onClose}
               className="flex-1 py-3 px-4 rounded-lg bg-white/5 text-white font-medium hover:bg-white/10 transition-colors"
             >
-              Cancel
+              {t.cancel}
             </button>
             <button
               type="submit"
               className="flex-1 py-3 px-4 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-500 transition-colors shadow-lg shadow-blue-900/20"
             >
-              Create
+              {t.create}
             </button>
           </div>
         </form>

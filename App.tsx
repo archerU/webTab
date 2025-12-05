@@ -1,25 +1,48 @@
 import React, { useState, useEffect } from 'react';
-import { Settings } from 'lucide-react';
+import { Settings, Globe } from 'lucide-react';
 import ShortcutGrid from './components/ShortcutGrid';
 import AddShortcutModal from './components/AddShortcutModal';
 import SettingsModal from './components/SettingsModal';
 import { saveCategories, getCategories, getSettings } from './services/storageService';
 import { Shortcut, Category, ModalType } from './types';
+import { useLanguage } from './contexts/LanguageContext';
 
 function App() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [activeCategoryId, setActiveCategoryId] = useState<string>('');
-  const [settings, setSettings] = useState(getSettings());
+  const [settings, setSettings] = useState(() => {
+    try {
+      return getSettings();
+    } catch (error) {
+      console.error('Error loading settings:', error);
+      return {
+        userName: 'User',
+        backgroundImageUrl: 'https://picsum.photos/1920/1080',
+        useAiGreetings: true
+      };
+    }
+  });
   const [modalType, setModalType] = useState<ModalType>(ModalType.NONE);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(true); // Start as loaded to avoid black screen
+  const { language, setLanguage: setLang, t } = useLanguage();
+  
+  const handleLanguageToggle = () => {
+    const newLang = language === 'en' ? 'zh' : 'en';
+    setLang(newLang);
+  };
 
   useEffect(() => {
-    const loadedCategories = getCategories();
-    setCategories(loadedCategories);
-    if (loadedCategories.length > 0) {
-      setActiveCategoryId(loadedCategories[0].id);
+    try {
+      const loadedCategories = getCategories();
+      setCategories(loadedCategories);
+      if (loadedCategories.length > 0) {
+        setActiveCategoryId(loadedCategories[0].id);
+      }
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    } finally {
+      setIsLoaded(true);
     }
-    setIsLoaded(true);
   }, []);
 
   const saveAll = (newCategories: Category[]) => {
@@ -46,12 +69,13 @@ function App() {
 
   // --- Shortcut Actions ---
 
-  const handleAddShortcut = (title: string, url: string, color: string) => {
+  const handleAddShortcut = (title: string, url: string, color: string, iconUrl?: string) => {
     const newShortcut: Shortcut = {
       id: Date.now().toString(),
       title,
       url,
-      color
+      color,
+      iconUrl
     };
 
     const updated = categories.map(cat => {
@@ -116,9 +140,20 @@ function App() {
     backgroundPosition: 'center',
   };
 
+  // Show loading state immediately, don't hide the page
+  if (!isLoaded) {
+    return (
+      <div className="relative w-full h-screen overflow-hidden flex items-center justify-center text-white bg-black">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-white/60">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="relative w-full h-screen overflow-hidden flex flex-col text-white transition-opacity duration-700 font-sans"
-         style={{ opacity: isLoaded ? 1 : 0 }}>
+    <div className="relative w-full h-screen overflow-hidden flex flex-col text-white font-sans">
       
       {/* Background Layer - Clear background without glass effect */}
       <div className="fixed inset-0 z-0" style={bgStyle} />
@@ -127,10 +162,18 @@ function App() {
       <div className="relative z-10 flex w-full h-full max-w-[1920px] mx-auto p-2 md:p-4 flex-col">
         
         {/* Header */}
-        <div className="flex justify-end mb-2 px-1">
+        <div className="flex justify-end gap-2 mb-2 px-1">
+            <button 
+               className="p-2 rounded-full bg-glass/20 backdrop-blur-sm hover:bg-glassHover border border-glassBorder text-white/80 hover:text-white transition-all shadow-lg flex items-center gap-2 px-3"
+               title={language === 'en' ? t.switchLanguage : '切换到英文'}
+               onClick={handleLanguageToggle}
+             >
+               <Globe size={16} />
+               <span className="text-xs font-medium">{language === 'en' ? 'EN' : '中文'}</span>
+             </button>
             <button 
                className="p-2 rounded-full bg-glass/20 backdrop-blur-sm hover:bg-glassHover border border-glassBorder text-white/80 hover:text-white transition-all shadow-lg"
-               title="Settings"
+               title={t.settings}
                onClick={() => setModalType(ModalType.SETTINGS)}
              >
                <Settings size={18} />
@@ -167,8 +210,8 @@ function App() {
             
             {categories.length === 0 && (
                 <div className="col-span-full flex flex-col items-center justify-center h-64 text-white/50">
-                    <p>No categories found.</p>
-                    <button onClick={() => setModalType(ModalType.SETTINGS)} className="mt-2 text-blue-400 hover:underline">Open Settings to add one</button>
+                    <p>{t.noCategories}</p>
+                    <button onClick={() => setModalType(ModalType.SETTINGS)} className="mt-2 text-blue-400 hover:underline">{t.openSettings}</button>
                 </div>
             )}
           </div>

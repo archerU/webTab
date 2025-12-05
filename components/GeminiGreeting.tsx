@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getDailyInsight } from '../services/geminiService';
 import { Sparkles, RefreshCcw } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface GeminiGreetingProps {
   userName: string;
@@ -9,10 +10,11 @@ interface GeminiGreetingProps {
 const GeminiGreeting: React.FC<GeminiGreetingProps> = ({ userName }) => {
   const [greeting, setGreeting] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const { t } = useLanguage();
 
   const fetchGreeting = async () => {
     if (!process.env.API_KEY) {
-        setGreeting(`Good day, ${userName}.`);
+        setGreeting(t.goodDay.replace('{name}', userName));
         return;
     }
 
@@ -47,7 +49,7 @@ const GeminiGreeting: React.FC<GeminiGreetingProps> = ({ userName }) => {
       <div className="bg-glass backdrop-blur-sm px-4 py-1.5 rounded-full border border-glassBorder text-white/90 text-xs sm:text-sm font-medium flex items-center gap-2 shadow-sm group">
         <Sparkles size={12} className="text-yellow-300" />
         {loading ? (
-            <span className="animate-pulse">Consulting the stars...</span>
+            <span className="animate-pulse">{t.consultingStars}</span>
         ) : (
             <span>{greeting}</span>
         )}

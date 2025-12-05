@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { Shortcut } from '../types';
 import { Plus, X, Globe } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface ShortcutGridProps {
   categoryId: string;
@@ -21,10 +22,15 @@ const ShortcutGrid: React.FC<ShortcutGridProps> = ({
 }) => {
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
+  const { t } = useLanguage();
 
-  const getFaviconUrl = (url: string) => {
+  const getFaviconUrl = (shortcut: Shortcut) => {
+    // Priority: custom icon > auto-fetched icon > Google favicon service
+    if (shortcut.iconUrl) {
+      return shortcut.iconUrl;
+    }
     try {
-      const domain = new URL(url).hostname;
+      const domain = new URL(shortcut.url).hostname;
       return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
     } catch {
       return '';
@@ -111,7 +117,7 @@ const ShortcutGrid: React.FC<ShortcutGridProps> = ({
             {/* Icon Container with Delete Button Inside */}
             <div 
               className="relative w-24 h-24 rounded-2xl flex items-center justify-center shadow-xl transition-all duration-300 group-hover:scale-105 bg-white/20 backdrop-blur-lg group-hover:bg-white/25 ring-1 ring-white/30 group-hover:ring-white/40"
-              style={{ backgroundColor: !getFaviconUrl(shortcut.url) ? shortcut.color : undefined }}
+              style={{ backgroundColor: !getFaviconUrl(shortcut) && shortcut.color ? shortcut.color : undefined }}
             >
                {/* Delete Button - Small */}
               <button
@@ -119,26 +125,35 @@ const ShortcutGrid: React.FC<ShortcutGridProps> = ({
                 onClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
-                  if(confirm('Delete shortcut?')) onDeleteClick(shortcut.id);
+                  if(confirm(t.deleteConfirm)) onDeleteClick(shortcut.id);
                 }}
                 className="absolute top-1 right-1 p-0.5 rounded-full bg-black/40 text-white/60 hover:bg-red-500 hover:text-white opacity-0 group-hover:opacity-100 transition-all duration-200 z-20 backdrop-blur-sm flex items-center justify-center"
-                title="Remove"
+                title={translations[getLanguage()].remove}
               >
                 <X size={10} strokeWidth={3} />
               </button>
 
-              <img 
-                src={getFaviconUrl(shortcut.url)} 
-                alt={shortcut.title}
-                className="w-14 h-14 object-contain drop-shadow-sm"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.parentElement!.classList.add('fallback-icon');
-                }}
-              />
-              <div className="hidden fallback-icon text-white/80">
-                  <Globe size={48} />
-              </div>
+              {getFaviconUrl(shortcut) ? (
+                <img 
+                  src={getFaviconUrl(shortcut)!} 
+                  alt={shortcut.title}
+                  className="w-14 h-14 rounded-lg object-cover drop-shadow-sm"
+                  onError={(e) => {
+                    const img = e.currentTarget;
+                    img.style.display = 'none';
+                    // Show fallback with color
+                    const fallback = document.createElement('div');
+                    fallback.className = 'w-14 h-14 rounded-lg flex items-center justify-center text-white font-bold text-xl';
+                    fallback.style.backgroundColor = shortcut.color || '#6366f1';
+                    fallback.textContent = shortcut.title.charAt(0).toUpperCase();
+                    img.parentElement?.appendChild(fallback);
+                  }}
+                />
+              ) : (
+                <div className="w-14 h-14 rounded-lg flex items-center justify-center text-white font-bold text-xl" style={{ backgroundColor: shortcut.color || '#6366f1' }}>
+                  {shortcut.title.charAt(0).toUpperCase() || '?'}
+                </div>
+              )}
             </div>
             
             {/* Title */}
@@ -156,7 +171,7 @@ const ShortcutGrid: React.FC<ShortcutGridProps> = ({
           <div className="w-24 h-24 rounded-2xl bg-white/5 border border-dashed border-white/10 flex items-center justify-center group-hover:bg-white/10 group-hover:border-white/30 transition-all duration-300">
             <Plus size={28} className="text-white/30 group-hover:text-white/60" />
           </div>
-          <span className="text-white/20 text-[10px] font-medium group-hover:text-white/50">Add</span>
+          <span className="text-white/20 text-[10px] font-medium group-hover:text-white/50">{t.add}</span>
         </div>
       </div>
     </div>
