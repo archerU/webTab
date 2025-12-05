@@ -128,7 +128,7 @@ const ShortcutGrid: React.FC<ShortcutGridProps> = ({
                   if(confirm(t.deleteConfirm)) onDeleteClick(shortcut.id);
                 }}
                 className="absolute top-1 right-1 p-0.5 rounded-full bg-black/40 text-white/60 hover:bg-red-500 hover:text-white opacity-0 group-hover:opacity-100 transition-all duration-200 z-20 backdrop-blur-sm flex items-center justify-center"
-                title={translations[getLanguage()].remove}
+                title={t.remove}
               >
                 <X size={10} strokeWidth={3} />
               </button>
