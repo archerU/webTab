@@ -26,9 +26,16 @@ const ShortcutGrid: React.FC<ShortcutGridProps> = ({
 
   const getFaviconUrl = (shortcut: Shortcut) => {
     // Priority: custom icon > auto-fetched icon > Google favicon service
+    // If iconUrl exists and is not empty, use it
     if (shortcut.iconUrl) {
       return shortcut.iconUrl;
     }
+    // If iconUrl is explicitly undefined/null/empty AND color exists, 
+    // it means user selected color mode - return empty to use color-based icon
+    if (!shortcut.iconUrl && shortcut.color) {
+      return '';
+    }
+    // Otherwise, try to get favicon from URL as fallback
     try {
       const domain = new URL(shortcut.url).hostname;
       return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
@@ -143,14 +150,14 @@ const ShortcutGrid: React.FC<ShortcutGridProps> = ({
                     img.style.display = 'none';
                     // Show fallback with color
                     const fallback = document.createElement('div');
-                    fallback.className = 'w-14 h-14 rounded-lg flex items-center justify-center text-white font-bold text-xl';
+                    fallback.className = 'w-14 h-14 rounded-lg flex items-center justify-center text-white font-bold text-2xl';
                     fallback.style.backgroundColor = shortcut.color || '#6366f1';
                     fallback.textContent = shortcut.title.charAt(0).toUpperCase();
                     img.parentElement?.appendChild(fallback);
                   }}
                 />
               ) : (
-                <div className="w-14 h-14 rounded-lg flex items-center justify-center text-white font-bold text-xl" style={{ backgroundColor: shortcut.color || '#6366f1' }}>
+                <div className="w-14 h-14 rounded-lg flex items-center justify-center text-white font-bold text-2xl" style={{ backgroundColor: shortcut.color || '#6366f1' }}>
                   {shortcut.title.charAt(0).toUpperCase() || '?'}
                 </div>
               )}

@@ -106,7 +106,8 @@ const AddShortcutModal: React.FC<AddShortcutModalProps> = ({ isOpen, onClose, on
     } else if (iconMode === 'auto' && customIconUrl) {
       iconUrl = customIconUrl;
     } else if (iconMode === 'color') {
-      // Use selected color
+      // Use selected color - explicitly set iconUrl to undefined so color-based icon is used
+      iconUrl = undefined;
       color = selectedColor;
     }
 
@@ -124,6 +125,8 @@ const AddShortcutModal: React.FC<AddShortcutModalProps> = ({ isOpen, onClose, on
   };
 
   const getPreviewIconUrl = () => {
+    // Only show preview image for upload or auto mode
+    // For color mode, we'll show the color-based icon instead
     if (iconMode === 'upload' && uploadedIconUrl) {
       return uploadedIconUrl;
     }
@@ -216,7 +219,12 @@ const AddShortcutModal: React.FC<AddShortcutModalProps> = ({ isOpen, onClose, on
                 
                 <button
                   type="button"
-                  onClick={() => setIconMode('color')}
+                  onClick={() => {
+                    setIconMode('color');
+                    // Clear icon URLs when switching to color mode
+                    setCustomIconUrl('');
+                    setUploadedIconUrl('');
+                  }}
                   className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                     iconMode === 'color'
                       ? 'bg-blue-600 text-white'
@@ -292,7 +300,7 @@ const AddShortcutModal: React.FC<AddShortcutModalProps> = ({ isOpen, onClose, on
                     />
                   ) : (
                     <div 
-                      className="w-16 h-16 rounded-lg flex items-center justify-center text-white font-bold text-xl"
+                      className="w-16 h-16 rounded-lg flex items-center justify-center text-white font-bold text-2xl shadow-lg"
                       style={{ backgroundColor: selectedColor }}
                     >
                       {title.charAt(0).toUpperCase() || '?'}
